@@ -420,11 +420,11 @@ document.querySelector("#exportImageBtn").addEventListener("click", async () => 
         fill: none;
       }
       .attribute-label {
-        fill: rgba(255, 248, 214, 0.9);
+        fill: #111111;
         font: 800 10px sans-serif;
         paint-order: stroke;
-        stroke: rgba(35, 24, 14, 0.86);
-        stroke-width: 2.4px;
+        stroke: rgba(255, 248, 214, 0.72);
+        stroke-width: 1.5px;
       }
     </style>
     <rect width="100%" height="100%" fill="#b6ad5c"/>
