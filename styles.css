@@ -184,6 +184,17 @@ button,
   pointer-events: none;
 }
 
+.attribute-label {
+  fill: rgba(255, 248, 214, 0.9);
+  font-size: 18px;
+  font-weight: 800;
+  paint-order: stroke;
+  pointer-events: none;
+  stroke: rgba(35, 24, 14, 0.86);
+  stroke-width: 4px;
+  user-select: none;
+}
+
 .stripe {
   opacity: 0.26;
   stroke: #fff;

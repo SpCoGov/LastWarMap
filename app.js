@@ -190,6 +190,7 @@ function renderMap() {
 
     group.append(matrixFill(item));
     group.append(matrixOutline(item));
+    group.append(attributeLabel(item));
     group.addEventListener("click", () => paintModule(item.id));
     group.addEventListener("keydown", (event) => {
       if (event.key === "Enter" || event.key === " ") paintModule(item.id);
@@ -232,6 +233,20 @@ function matrixOutline(item) {
     d: edges.map(([x1, y1, x2, y2]) => `M${x1 * UNIT} ${y1 * UNIT}L${x2 * UNIT} ${y2 * UNIT}`).join(""),
     fill: "none",
   });
+}
+
+function attributeLabel(item) {
+  const rows = matrices[item.shape].cells;
+  const scale = matrices[item.shape].scale || 1;
+  const width = rows[0].length * scale * UNIT;
+  const height = rows.length * scale * UNIT;
+  return svgEl("text", {
+    class: "attribute-label",
+    x: width / 2,
+    y: height / 2,
+    "dominant-baseline": "middle",
+    "text-anchor": "middle",
+  }, item.attribute);
 }
 
 function expandedCells(item) {
@@ -383,6 +398,13 @@ document.querySelector("#exportImageBtn").addEventListener("click", async () => 
         stroke-linecap: square;
         shape-rendering: crispEdges;
         fill: none;
+      }
+      .attribute-label {
+        fill: rgba(255, 248, 214, 0.9);
+        font: 800 18px sans-serif;
+        paint-order: stroke;
+        stroke: rgba(35, 24, 14, 0.86);
+        stroke-width: 4px;
       }
     </style>
     <rect width="100%" height="100%" fill="#b6ad5c"/>
