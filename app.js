@@ -421,7 +421,7 @@ document.querySelector("#exportImageBtn").addEventListener("click", async () => 
       }
       .attribute-label {
         fill: #111111;
-        font: 800 10px sans-serif;
+        font: 800 20px sans-serif;
         paint-order: stroke;
         stroke: rgba(255, 248, 214, 0.72);
         stroke-width: 1.5px;
