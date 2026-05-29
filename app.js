@@ -66,6 +66,24 @@ const attributeAssignments = {
   "Lv.1 郊狼镇":["gap-1-1","gap-5-1","gap-9-1","gap-13-1","gap-17-1","gap-21-1","gap-1-5","gap-5-5","gap-9-5","gap-13-5","gap-17-5","gap-21-5","gap-1-9","gap-5-9","gap-1-13","gap-5-13","gap-1-17","gap-5-17","gap-1-21","gap-5-21"], "Lv.2 蓄水镇":["gap-9-9","gap-13-9","gap-17-9","gap-21-9","gap-9-13","gap-13-13","gap-17-13","gap-21-13","gap-9-17","gap-13-17","gap-9-21","gap-13-21"], "Lv.3 狂徒街":["gap-17-17","gap-21-17","gap-17-21","gap-21-21"], "Lv.4 赛马场":["gap-25-1","gap-29-1","gap-25-5","gap-29-5","gap-25-9","gap-29-9","gap-25-13","gap-29-13","gap-25-17","gap-29-17","gap-25-21","gap-29-21","gap-1-25","gap-5-25","gap-9-25","gap-13-25","gap-17-25","gap-21-25","gap-25-25","gap-29-25","gap-1-29","gap-5-29","gap-9-29","gap-13-29","gap-17-29","gap-21-29","gap-25-29","gap-29-29"], "Lv.5 金沙郡":["gap-33-1","gap-37-1","gap-33-5","gap-37-5","gap-33-9","gap-37-9","gap-33-13","gap-37-13","gap-33-17","gap-37-17","gap-33-21","gap-37-21","gap-33-25","gap-1-33","gap-5-33","gap-9-33","gap-13-33","gap-17-33","gap-21-33","gap-25-33","gap-1-37","gap-5-37","gap-9-37","gap-13-37","gap-17-37","gap-21-37"], "Lv.1 贸易站":["gap-37-25","gap-33-29","gap-29-33","gap-25-37"], "Lv.2 贸易站":["gap-37-29","gap-33-33"], "Lv.3 贸易站":["gap-29-37","gap-33-37"], "Lv.4 贸易站":["gap-37-33","gap-37-37"], "Lv.7 枢纽城":["cross-18-18"]
 };
 
+const attributeLabels = {
+  "Lv.1 拓荒者银行": "1",
+  "Lv.2 拓荒者银行": "2",
+  "Lv.3 拓荒者银行": "3",
+  "Lv.4 拓荒者银行": "4",
+  "Lv.5 拓荒者银行": "5",
+  "Lv.1 郊狼镇": "1",
+  "Lv.2 蓄水镇": "2",
+  "Lv.3 狂徒街": "3",
+  "Lv.4 赛马场": "4",
+  "Lv.5 金沙郡": "5",
+  "Lv.1 贸易站": "1",
+  "Lv.2 贸易站": "2",
+  "Lv.3 贸易站": "3",
+  "Lv.4 贸易站": "4",
+  "Lv.7 枢纽城": "枢纽城",
+};
+
 let modules = buildModules();
 let state = loadState();
 let activeColor = state.activeColor || "orange";
@@ -236,6 +254,8 @@ function matrixOutline(item) {
 }
 
 function attributeLabel(item) {
+  const label = attributeLabels[item.attribute] || "";
+  if (!label) return svgEl("g", {});
   const rows = matrices[item.shape].cells;
   const scale = matrices[item.shape].scale || 1;
   const width = rows[0].length * scale * UNIT;
@@ -246,7 +266,7 @@ function attributeLabel(item) {
     y: height / 2,
     "dominant-baseline": "middle",
     "text-anchor": "middle",
-  }, item.attribute);
+  }, label);
 }
 
 function expandedCells(item) {
@@ -401,10 +421,10 @@ document.querySelector("#exportImageBtn").addEventListener("click", async () => 
       }
       .attribute-label {
         fill: rgba(255, 248, 214, 0.9);
-        font: 800 18px sans-serif;
+        font: 800 10px sans-serif;
         paint-order: stroke;
         stroke: rgba(35, 24, 14, 0.86);
-        stroke-width: 4px;
+        stroke-width: 2.4px;
       }
     </style>
     <rect width="100%" height="100%" fill="#b6ad5c"/>

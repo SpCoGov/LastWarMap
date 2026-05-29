@@ -186,12 +186,12 @@ button,
 
 .attribute-label {
   fill: rgba(255, 248, 214, 0.9);
-  font-size: 18px;
+  font-size: 20px;
   font-weight: 800;
   paint-order: stroke;
   pointer-events: none;
   stroke: rgba(35, 24, 14, 0.86);
-  stroke-width: 4px;
+  stroke-width: 2.4px;
   user-select: none;
 }
 
