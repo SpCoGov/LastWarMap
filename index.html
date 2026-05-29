@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Last War 地图标记器</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <button id="panelToggle" type="button" class="panel-toggle" aria-expanded="false" aria-controls="sidePanel">设置</button>
+    <main class="app-shell">
+      <section class="map-panel" aria-label="地图编辑区">
+        <div class="topbar">
+          <div>
+            <p class="eyebrow">Last War Map</p>
+            <h1>战区地图标记器</h1>
+          </div>
+          <div class="actions">
+            <button id="exportImageBtn" type="button">导出图片</button>
+            <button id="exportBtn" type="button">导出</button>
+            <label class="import-btn">
+              导入
+              <input id="importInput" type="file" accept="application/json" />
+            </label>
+            <button id="resetBtn" type="button" class="ghost">清空</button>
+          </div>
+        </div>
+
+        <div class="map-wrap">
+          <svg id="mapSvg" viewBox="0 0 960 960" role="img" aria-label="战区地图模块"></svg>
+        </div>
+      </section>
+
+      <aside id="sidePanel" class="side-panel" aria-label="地图配置">
+        <section>
+          <h2>当前画笔</h2>
+          <div id="palette" class="palette"></div>
+        </section>
+
+        <section>
+          <h2>属性筛选</h2>
+          <div id="categoryFilter" class="shape-picker"></div>
+          <button id="copyColorIdsBtn" type="button" class="copy-ids-btn">复制当前颜色 ID</button>
+        </section>
+
+        <section>
+          <h2>颜色配置</h2>
+          <div id="colorEditor" class="color-editor"></div>
+        </section>
+
+        <section>
+          <h2>选中格子</h2>
+          <div id="selectionInfo" class="selection-info">点击地图上的任意模块。</div>
+        </section>
+      </aside>
+    </main>
+
+    <script src="app.js"></script>
+  </body>
+</html>
