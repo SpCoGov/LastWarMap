@@ -2,59 +2,131 @@
 <html lang="zh-CN">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Last War 地图标记器</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
+    <title>Last War 全屏地图</title>
     <link rel="stylesheet" href="styles.css" />
   </head>
-  <body>
-    <button id="panelToggle" type="button" class="panel-toggle" aria-expanded="false" aria-controls="sidePanel">设置</button>
+  <body class="panel-open">
     <main class="app-shell">
       <section class="map-panel" aria-label="地图编辑区">
-        <div class="topbar">
-          <div>
-            <p class="eyebrow">Last War Map</p>
-            <h1>战区地图标记器</h1>
+        <header class="topbar">
+          <div class="brand">
+            <span class="brand-mark" aria-hidden="true"></span>
+            <div>
+              <p class="eyebrow">LAST WAR MAP</p>
+              <h1>战区地图</h1>
+            </div>
           </div>
           <div class="actions">
-            <button id="exportImageBtn" type="button">导出图片</button>
-            <button id="exportBtn" type="button">导出</button>
-            <label class="import-btn">
-              导入
+            <button id="exportImageBtn" type="button" class="tool-icon-button" aria-label="导出图片" title="导出图片">
+              <i data-lucide="image-down" aria-hidden="true"></i>
+            </button>
+            <button id="exportBtn" type="button" class="tool-icon-button" aria-label="导出数据" title="导出数据">
+              <i data-lucide="file-down" aria-hidden="true"></i>
+            </button>
+            <label class="import-btn tool-icon-button" aria-label="导入数据" title="导入数据">
+              <i data-lucide="file-up" aria-hidden="true"></i>
               <input id="importInput" type="file" accept="application/json" />
             </label>
-            <button id="resetBtn" type="button" class="ghost">清空</button>
+            <button id="resetBtn" type="button" class="danger-button tool-icon-button" aria-label="清空标记" title="清空标记">
+              <i data-lucide="rotate-ccw" aria-hidden="true"></i>
+            </button>
+          </div>
+        </header>
+
+        <div id="mapViewport" class="map-viewport">
+          <div id="mapSurface" class="map-surface">
+            <canvas id="navigationCanvas" class="navigation-canvas" aria-hidden="true"></canvas>
+            <svg id="mapSvg" viewBox="0 0 960 960" role="img" aria-label="战区地图模块"></svg>
           </div>
         </div>
 
-        <div class="map-wrap">
-          <svg id="mapSvg" viewBox="0 0 960 960" role="img" aria-label="战区地图模块"></svg>
+        <div class="zoom-controls" aria-label="地图缩放控制">
+          <output id="zoomLabel" class="zoom-label" aria-label="当前缩放比例">100%</output>
+          <button id="zoomInBtn" type="button" aria-label="放大地图" title="放大">
+            <i data-lucide="plus" aria-hidden="true"></i>
+          </button>
+          <button id="zoomOutBtn" type="button" aria-label="缩小地图" title="缩小">
+            <i data-lucide="minus" aria-hidden="true"></i>
+          </button>
+          <button id="fitMapBtn" type="button" class="fit-button" aria-label="显示完整地图" title="显示完整地图">
+            <i data-lucide="maximize" aria-hidden="true"></i>
+          </button>
         </div>
       </section>
 
+      <button id="statsToggle" type="button" class="panel-toggle stats-toggle" aria-label="地图统计" title="地图统计" aria-expanded="false" aria-controls="statsPanel">
+        <i data-lucide="chart-bar" aria-hidden="true"></i>
+      </button>
+      <button id="panelToggle" type="button" class="panel-toggle" aria-label="地图设置" title="地图设置" aria-expanded="true" aria-controls="sidePanel">
+        <i data-lucide="settings" aria-hidden="true"></i>
+      </button>
+      <button id="colorToggle" type="button" class="panel-toggle color-toggle" aria-label="颜色配置" title="颜色配置" aria-expanded="false" aria-controls="colorPanel">
+        <i data-lucide="palette" aria-hidden="true"></i>
+      </button>
+
       <aside id="sidePanel" class="side-panel" aria-label="地图配置">
+        <div class="panel-heading">
+          <div>
+            <p class="eyebrow">MAP TOOLS</p>
+            <h2>地图设置</h2>
+          </div>
+          <button id="panelClose" type="button" class="icon-button" aria-label="关闭设置" title="关闭设置">
+            <i data-lucide="x" aria-hidden="true"></i>
+          </button>
+        </div>
+
         <section>
-          <h2>当前画笔</h2>
+          <h3>当前画笔</h3>
           <div id="palette" class="palette"></div>
         </section>
 
         <section>
-          <h2>属性筛选</h2>
-          <div id="categoryFilter" class="shape-picker"></div>
-          <button id="copyColorIdsBtn" type="button" class="copy-ids-btn">复制当前颜色 ID</button>
-        </section>
-
-        <section>
-          <h2>颜色配置</h2>
-          <div id="colorEditor" class="color-editor"></div>
-        </section>
-
-        <section>
-          <h2>选中格子</h2>
+          <h3>选中格子</h3>
           <div id="selectionInfo" class="selection-info">点击地图上的任意模块。</div>
+        </section>
+
+        <section class="filter-section">
+          <h3>属性筛选</h3>
+          <button id="copyColorIdsBtn" type="button" class="copy-ids-btn">复制当前颜色 ID</button>
+          <div id="categoryFilter" class="shape-picker"></div>
+        </section>
+      </aside>
+
+      <aside id="statsPanel" class="stats-panel" aria-label="地图统计">
+        <div class="panel-heading">
+          <div>
+            <p class="eyebrow">MAP STATISTICS</p>
+            <h2>地图统计</h2>
+          </div>
+          <button id="statsClose" type="button" class="icon-button" aria-label="关闭地图统计" title="关闭地图统计">
+            <i data-lucide="x" aria-hidden="true"></i>
+          </button>
+        </div>
+
+        <section>
+          <div id="colorStats" class="stats-list"></div>
+        </section>
+      </aside>
+
+      <aside id="colorPanel" class="color-panel" aria-label="颜色配置">
+        <div class="panel-heading">
+          <div>
+            <p class="eyebrow">COLOR TOOLS</p>
+            <h2>颜色配置</h2>
+          </div>
+          <button id="colorClose" type="button" class="icon-button" aria-label="关闭颜色配置" title="关闭颜色配置">
+            <i data-lucide="x" aria-hidden="true"></i>
+          </button>
+        </div>
+
+        <section>
+          <div id="colorEditor" class="color-editor"></div>
         </section>
       </aside>
     </main>
 
+    <script src="https://unpkg.com/lucide@1.26.0/dist/umd/lucide.min.js"></script>
     <script src="app.js"></script>
   </body>
 </html>
