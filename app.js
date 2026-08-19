@@ -123,14 +123,10 @@ const mapViewport = document.querySelector("#mapViewport");
 const mapSurface = document.querySelector("#mapSurface");
 const navigationCanvas = document.querySelector("#navigationCanvas");
 const zoomLabel = document.querySelector("#zoomLabel");
-const MAP_WIDTH = Math.round(INNER_UNITS * UNIT_X);
-const MAP_HEIGHT = Math.round(INNER_UNITS * UNIT_Y);
-mapSurface.style.width = `${MAP_WIDTH}px`;
-mapSurface.style.height = `${MAP_HEIGHT}px`;
-mapSvg.style.width = `${MAP_WIDTH}px`;
-mapSvg.style.height = `${MAP_HEIGHT}px`;
-navigationCanvas.width = MAP_WIDTH;
-navigationCanvas.height = MAP_HEIGHT;
+const mapModeToggle = document.querySelector("#mapModeToggle");
+const mapModeText = document.querySelector("#mapModeText");
+let MAP_WIDTH;
+let MAP_HEIGHT;
 const MIN_SCALE = 0.08;
 const MAX_SCALE = 4;
 const viewState = { x: 0, y: 0, scale: 1 };
@@ -142,6 +138,28 @@ let suppressMapClick = false;
 let viewFrame = 0;
 let canvasFrame = 0;
 let navigationIdleTimer = 0;
+
+function visibleModules() {
+  return state.mapMode === "single"
+    ? modules.filter((item) => item.id.startsWith("map-1-1-"))
+    : modules;
+}
+
+function updateMapDimensions() {
+  const mapUnits = state.mapMode === "single" ? BASE_UNITS : INNER_UNITS;
+  MAP_WIDTH = Math.round(mapUnits * UNIT_X);
+  MAP_HEIGHT = Math.round(mapUnits * UNIT_Y);
+  mapSurface.style.width = `${MAP_WIDTH}px`;
+  mapSurface.style.height = `${MAP_HEIGHT}px`;
+  mapSvg.style.width = `${MAP_WIDTH}px`;
+  mapSvg.style.height = `${MAP_HEIGHT}px`;
+  navigationCanvas.width = MAP_WIDTH;
+  navigationCanvas.height = MAP_HEIGHT;
+  mapModeToggle.checked = state.mapMode !== "single";
+  mapModeText.textContent = mapModeToggle.checked ? "完整地图" : "单块战区";
+}
+
+updateMapDimensions();
 
 function buildModules() {
   const baseModules = buildBaseModules();
@@ -264,6 +282,7 @@ function loadState() {
       return {
         palette: saved.palette,
         activeColor: saved.activeColor || "orange",
+        mapMode: saved.mapMode === "single" ? "single" : "full",
       };
     }
 
@@ -285,17 +304,18 @@ function loadState() {
       return {
         palette: legacy.palette,
         activeColor: legacy.activeColor || "orange",
+        mapMode: "full",
       };
     }
   } catch {
     localStorage.removeItem(STORAGE_KEY);
   }
-  return { palette: defaultPalette.map((item) => ({ ...item })), activeColor: "orange" };
+  return { palette: defaultPalette.map((item) => ({ ...item })), activeColor: "orange", mapMode: "full" };
 }
 
 function saveState() {
   const colors = Object.fromEntries(modules.map((item) => [item.id, item.colorId]));
-  localStorage.setItem(STORAGE_KEY, JSON.stringify({ palette: state.palette, activeColor, colors }));
+  localStorage.setItem(STORAGE_KEY, JSON.stringify({ palette: state.palette, activeColor, mapMode: state.mapMode, colors }));
 }
 
 function getColor(colorId) {
@@ -310,7 +330,7 @@ function renderMap() {
   mapSvg.setAttribute("viewBox", `0 0 ${MAP_WIDTH} ${MAP_HEIGHT}`);
   mapSvg.innerHTML = "";
   const fragment = document.createDocumentFragment();
-  modules.forEach((item) => {
+  visibleModules().forEach((item) => {
     const group = svgEl("g", {
       class: `tile ${selectedModule === item.id ? "selected" : ""} ${activeCategoryFilter !== "all" && activeCategoryFilter !== item.attribute ? "dimmed" : ""}`,
       transform: `translate(${item.x * UNIT_X}, ${item.y * UNIT_Y})`,
@@ -434,7 +454,7 @@ function renderNavigationCanvas() {
   context.lineJoin = "miter";
   context.lineCap = "square";
 
-  modules.forEach((item) => {
+  visibleModules().forEach((item) => {
     const rows = matrices[item.shape].cells;
     const scale = matrices[item.shape].scale || 1;
     context.globalAlpha = activeCategoryFilter !== "all" && activeCategoryFilter !== item.attribute ? 0.2 : 1;
@@ -628,7 +648,7 @@ function renderStatistics() {
     .filter((item) => item.id !== "empty")
     .forEach((item) => statsByColor.set(item.id, new Map()));
 
-  modules.forEach((item) => {
+  visibleModules().forEach((item) => {
     if (item.colorId === "empty") return;
     if (!statsByColor.has(item.colorId)) statsByColor.set(item.colorId, new Map());
     const attributeCounts = statsByColor.get(item.colorId);
@@ -666,6 +686,7 @@ function renderStatistics() {
 }
 
 function renderAll() {
+  updateMapDimensions();
   renderMap();
   renderNavigationCanvas();
   renderPalette();
@@ -693,7 +714,7 @@ document.querySelector("#resetBtn").addEventListener("click", () => {
   if (!confirm("确定清空所有本地标记吗？")) return;
   modules = buildModules();
   moduleById = new Map(modules.map((item) => [item.id, item]));
-  state = { palette: defaultPalette.map((item) => ({ ...item })), activeColor: "orange" };
+  state = { palette: defaultPalette.map((item) => ({ ...item })), activeColor: "orange", mapMode: "full" };
   activeColor = "orange";
   activeCategoryFilter = "all";
   selectedModule = null;
@@ -703,7 +724,7 @@ document.querySelector("#resetBtn").addEventListener("click", () => {
 
 document.querySelector("#exportBtn").addEventListener("click", () => {
   const colors = Object.fromEntries(modules.map((item) => [item.id, item.colorId]));
-  const blob = new Blob([JSON.stringify({ palette: state.palette, activeColor, colors }, null, 2)], { type: "application/json" });
+  const blob = new Blob([JSON.stringify({ palette: state.palette, activeColor, mapMode: state.mapMode, colors }, null, 2)], { type: "application/json" });
   const url = URL.createObjectURL(blob);
   const link = document.createElement("a");
   link.href = url;
@@ -769,7 +790,7 @@ document.querySelector("#exportImageBtn").addEventListener("click", async () => 
 });
 
 copyColorIdsBtn.addEventListener("click", async () => {
-  const ids = modules
+  const ids = visibleModules()
     .filter((item) => item.colorId === activeColor)
     .map((item) => item.id);
   const text = JSON.stringify(ids);
@@ -1002,6 +1023,14 @@ document.querySelector("#zoomInBtn").addEventListener("click", () => zoomFromCen
 document.querySelector("#zoomOutBtn").addEventListener("click", () => zoomFromCenter(1 / 1.3));
 document.querySelector("#fitMapBtn").addEventListener("click", fitMap);
 
+mapModeToggle.addEventListener("change", () => {
+  state.mapMode = mapModeToggle.checked ? "full" : "single";
+  selectedModule = null;
+  saveState();
+  renderAll();
+  fitMap();
+});
+
 window.addEventListener("resize", () => {
   if (!viewReady) return;
   applyView();
@@ -1022,7 +1051,11 @@ document.querySelector("#importInput").addEventListener("change", async (event) 
       || "empty",
   }));
   moduleById = new Map(modules.map((item) => [item.id, item]));
-  state = { palette: imported.palette, activeColor: imported.activeColor || "orange" };
+  state = {
+    palette: imported.palette,
+    activeColor: imported.activeColor || "orange",
+    mapMode: imported.mapMode === "single" ? "single" : state.mapMode,
+  };
   activeColor = state.activeColor;
   activeCategoryFilter = "all";
   selectedModule = null;
